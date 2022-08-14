@@ -47,3 +47,13 @@ c3 := getResultError()
 
 fmt.Println(c3.UnwrapOrElse("default")) // default
 ```
+
+## Error Handling
+
+```go
+c3 := getResultError().UnwrapOrOn(func (res error){
+    fmt.Println(error.Error())
+    return "default"
+})
+fmt.Println(c3) // default
+```

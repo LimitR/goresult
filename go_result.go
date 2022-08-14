@@ -32,6 +32,13 @@ func (s *Result[T]) UnwrapOrElse(value T) T {
 	return s.Value
 }
 
+func (s *Result[T]) UnwrapOrOn(callback func(error)) T {
+	if s.Err != nil {
+		callback(s.Err)
+	}
+	return s.Value
+}
+
 func (s *Result[T]) Some(value T) *Result[T] {
 	s.Value = value
 	s.Err = nil
@@ -41,6 +48,14 @@ func (s *Result[T]) Some(value T) *Result[T] {
 func (s *Result[T]) Error(value string) *Result[T] {
 	s.Err = errors.New(value)
 	return s
+}
+
+func (s *Result[T]) Match(err error) error {
+	if errors.Is(s.Err, err) {
+		return s.Err
+	} else {
+		return nil
+	}
 }
 
 func (s *Result[T]) IsOk() bool {
