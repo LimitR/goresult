@@ -1,3 +1,3 @@
-module github.com/LimitR/go_result
+module github.com/LimitR/goresult
 
 go 1.18
