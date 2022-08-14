@@ -10,8 +10,8 @@ type Result[T any] struct {
 	Err   error
 }
 
-func NewResult(value any) *Result[any] {
-	return &Result[any]{
+func NewResult[T any](value T) *Result[T] {
+	return &Result[T]{
 		Value: value,
 		Err:   nil,
 	}
