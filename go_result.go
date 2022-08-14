@@ -2,7 +2,6 @@ package goresult
 
 import (
 	"errors"
-	"log"
 )
 
 type Result[T any] struct {
@@ -19,7 +18,7 @@ func NewResult[T any](value T) *Result[T] {
 
 func (s *Result[T]) Unwrap() T {
 	if s.Err != nil {
-		log.Fatal(s.Err)
+		panic(s.Err)
 	}
 	return s.Value
 }
