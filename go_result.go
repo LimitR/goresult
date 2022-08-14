@@ -10,7 +10,7 @@ type Result[T any] struct {
 	Err   error
 }
 
-func NewResult[T string | int | []string | []int](value T) *Result[T] {
+func NewResult[T any](value T) *Result[T] {
 	return &Result[T]{
 		Value: value,
 		Err:   nil,
@@ -34,7 +34,9 @@ func (s *Result[T]) UnwrapOrElse(value T) T {
 
 func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
 	if s.Err != nil {
-		return callback(s.Err)
+		res := callback(s.Err)
+		s.Value = res
+		return res
 	}
 	return s.Value
 }
