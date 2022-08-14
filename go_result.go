@@ -1,4 +1,4 @@
-package goresult
+package go_result
 
 import (
 	"errors"
