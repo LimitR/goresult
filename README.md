@@ -21,6 +21,9 @@ func main() {
 	fmt.Println(c.Unwrap()) // value ok
 	fmt.Println(c2.Unwrap()) // ok
 	fmt.Println(c3.Unwrap()) // 2022/08/14 16:25:47 Not ok
+
+    file := goresult.CreateResult(os.Open("/path/to/file.txt")).Unwrap()
+	defer file.Close()
 }
 
 func getResultOk() *goresult.Result[any] {
