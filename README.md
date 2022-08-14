@@ -28,7 +28,7 @@ func getResultOk() *goresult.Result[any] {
 	return res
 }
 
-func getResultError() *goresult.Result[any] {
+func getResultError() *goresult.Result[string] {
 	res := goresult.NewResult("ok")
 	res.Error("Not ok")
 	return res
@@ -51,9 +51,9 @@ fmt.Println(c3.UnwrapOrElse("default")) // default
 ## Error Handling
 
 ```go
-c3 := getResultError().UnwrapOrOn(func (res error){
-    fmt.Println(error.Error())
-    return "default"
+c3 := getResultError().UnwrapOrOn(func(res error) string {
+	fmt.Println(res.Error()) // Not ok
+	return "default"
 })
 fmt.Println(c3) // default
 ```
