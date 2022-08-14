@@ -32,9 +32,9 @@ func (s *Result[T]) UnwrapOrElse(value T) T {
 	return s.Value
 }
 
-func (s *Result[T]) UnwrapOrOn(callback func(error)) T {
+func (s *Result[T]) UnwrapOrOn(callback func(error) any) any {
 	if s.Err != nil {
-		callback(s.Err)
+		return callback(s.Err)
 	}
 	return s.Value
 }
