@@ -31,7 +31,6 @@ func (s *Result[T]) Some(value T) *Result[T] {
 }
 
 func (s *Result[T]) Error(value string) *Result[T] {
-	s.Value = s.Value
 	s.Err = errors.New(value)
 	return s
 }
