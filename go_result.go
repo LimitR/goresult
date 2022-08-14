@@ -61,9 +61,5 @@ func (s *Result[T]) Match(err error) error {
 }
 
 func (s *Result[T]) IsOk() bool {
-	if s.Err == nil {
-		return true
-	} else {
-		return false
-	}
+	return s.Err == nil
 }
