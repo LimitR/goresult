@@ -16,6 +16,13 @@ func NewResult[T any](value T) *Result[T] {
 	}
 }
 
+func CreateResult[T any](value T, err error) *Result[T] {
+	return &Result[T]{
+		Value: value,
+		Err:   err,
+	}
+}
+
 func (s *Result[T]) Unwrap() T {
 	if s.Err != nil {
 		panic(s.Err)
