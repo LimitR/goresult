@@ -24,6 +24,14 @@ func (s *Result[T]) Unwrap() T {
 	return s.Value
 }
 
+func (s *Result[T]) UnwrapOrElse(value T) T {
+	if s.Err != nil {
+		s.Err = nil
+		s.Value = value
+	}
+	return s.Value
+}
+
 func (s *Result[T]) Some(value T) *Result[T] {
 	s.Value = value
 	s.Err = nil
