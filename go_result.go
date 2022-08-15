@@ -5,67 +5,67 @@ import (
 )
 
 type Result[T any] struct {
-	Value T
-	Err   error
+	value T
+	err   error
 }
 
 func NewResult[T any](value T) *Result[T] {
 	return &Result[T]{
-		Value: value,
-		Err:   nil,
+		value: value,
+		err:   nil,
 	}
 }
 
 func CreateResult[T any](value T, err error) *Result[T] {
 	return &Result[T]{
-		Value: value,
-		Err:   err,
+		value: value,
+		err:   err,
 	}
 }
 
 func (s *Result[T]) Unwrap() T {
-	if s.Err != nil {
-		panic(s.Err)
+	if s.err != nil {
+		panic(s.err)
 	}
-	return s.Value
+	return s.value
 }
 
 func (s *Result[T]) UnwrapOrElse(value T) T {
-	if s.Err != nil {
-		s.Err = nil
-		s.Value = value
+	if s.err != nil {
+		s.err = nil
+		s.value = value
 	}
-	return s.Value
+	return s.value
 }
 
 func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
-	if s.Err != nil {
-		res := callback(s.Err)
-		s.Value = res
+	if s.err != nil {
+		res := callback(s.err)
+		s.value = res
 		return res
 	}
-	return s.Value
+	return s.value
 }
 
 func (s *Result[T]) Some(value T) *Result[T] {
-	s.Value = value
-	s.Err = nil
+	s.value = value
+	s.err = nil
 	return s
 }
 
 func (s *Result[T]) Error(value string) *Result[T] {
-	s.Err = errors.New(value)
+	s.err = errors.New(value)
 	return s
 }
 
 func (s *Result[T]) Match(err error) error {
-	if errors.Is(s.Err, err) {
-		return s.Err
+	if errors.Is(s.err, err) {
+		return s.err
 	} else {
 		return nil
 	}
 }
 
 func (s *Result[T]) IsOk() bool {
-	return s.Err == nil
+	return s.err == nil
 }
