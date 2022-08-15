@@ -60,14 +60,14 @@ If the result is an error, the value will be deleted after processing
 ```go
 c3 := getResultError().UnwrapOrOn(func(res error) string {
 	fmt.Println(res.Error()) // Not ok
-	return "default"
+	return "default" // new value c3
 })
 fmt.Println(c3) // default
 
 // Or
 
 c3 := getResultError().UnwrapDelay(func(res string) {
-	fmt.Println(res) // ok
+	fmt.Println(res) // ok - value Result
 	// ... Some code before the panic
 	// ...
 }) // panic: AAAA
