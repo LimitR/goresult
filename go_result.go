@@ -30,7 +30,7 @@ func (s *Result[T]) Unwrap() T {
 	return s.value
 }
 
-func (s *Result[T]) UnwrapAndSaveValue(callback func(to T)) T {
+func (s *Result[T]) UnwrapDelay(callback func(res T)) T {
 	if s.err != nil {
 		defer callback(s.value)
 		panic(s.err)

@@ -21,6 +21,7 @@ func main() {
 	fmt.Println(c.Unwrap()) // value ok
 	fmt.Println(c2.Unwrap()) // ok
 	fmt.Println(c3.Unwrap()) // 2022/08/14 16:25:47 Not ok
+	fmt.Println(c3.Expect("Castom panic")) // panic: Castom panic
 
     file := goresult.CreateResultFrom(os.Open("/path/to/file.txt")).Unwrap()
 	defer file.Close()
@@ -46,6 +47,7 @@ c3 := getResultError()
 fmt.Println(c3.Unwrap()) // default
 
 // Or
+
 c3 := getResultError()
 
 fmt.Println(c3.UnwrapOrElse("default")) // default
@@ -61,4 +63,12 @@ c3 := getResultError().UnwrapOrOn(func(res error) string {
 	return "default"
 })
 fmt.Println(c3) // default
+
+// Or
+
+c3 := getResultError().UnwrapDelay(func(res string) {
+	fmt.Println(res) // ok
+	// ... Some code before the panic
+	// ...
+}) // panic: AAAA
 ```
