@@ -22,18 +22,18 @@ func main() {
 	fmt.Println(c2.Unwrap()) // ok
 	fmt.Println(c3.Unwrap()) // 2022/08/14 16:25:47 Not ok
 
-    file := goresult.CreateResult(os.Open("/path/to/file.txt")).Unwrap()
+    file := goresult.CreateResultFrom(os.Open("/path/to/file.txt")).Unwrap()
 	defer file.Close()
 }
 
-func getResultOk() *goresult.Result[any] {
+func getResultOk() *goresult.Result[string] {
 	res := goresult.NewResult("ok")
 	return res
 }
 
 func getResultError() *goresult.Result[string] {
 	res := goresult.NewResult("ok")
-	res.Error("Not ok")
+	res.AddError("Not ok")
 	return res
 }
 ```
@@ -41,7 +41,7 @@ func getResultError() *goresult.Result[string] {
 ```go
 c3 := getResultError()
 	if !c3.IsOk() {
-		c3 = c3.Some("default")
+		c3 = goresult.NewResult("default")
 	}
 fmt.Println(c3.Unwrap()) // default
 
@@ -50,6 +50,8 @@ c3 := getResultError()
 
 fmt.Println(c3.UnwrapOrElse("default")) // default
 ```
+
+If the result is an error, the value will be deleted after processing
 
 ## Error Handling
 
