@@ -71,4 +71,24 @@ c3 := getResultError().UnwrapDelay(func(res string) {
 	// ... Some code before the panic
 	// ...
 }) // panic: AAAA
+
+// Or
+
+c3 := getResultError().UnwrapDelay(func(res string) {
+	fmt.Println(res) // ok - value Result
+	recover()
+}) // not panic
+// But c3 = Result[string]
+fmt.Println(c3.Unwrap()) // ok
+```
+If you need to process more than one Result
+```go
+c := goresult.NewResult("ok")
+c2 := goresult.NewResult("ok2")
+c2.AddError("Panic")
+c3 := goresult.NewResult("ok3")
+
+checker := []Result[string]{*c, *c2, *c3}
+
+fmt.Println(goresult.CheckAll(ch)) // [ok ok3]
 ```
