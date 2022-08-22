@@ -77,6 +77,9 @@ func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
 }
 
 func (s *Result[T]) AddError(value string) *Result[T] {
+	if s.err != nil {
+		panic(s.err)
+	}
 	s.err = errors.New(value)
 	return s
 }
