@@ -34,7 +34,7 @@ func getResultOk() *goresult.Result[string] {
 
 func getResultError() *goresult.Result[string] {
 	res := goresult.NewResult("ok")
-	res.AddError("Not ok")
+	res.AddError(errors.New("Not ok"))
 	return res
 }
 ```
@@ -85,10 +85,10 @@ If you need to process more than one Result
 ```go
 c := goresult.NewResult("ok")
 c2 := goresult.NewResult("ok2")
-c2.AddError("Panic")
+c2.AddError(errors.New("Panic"))
 c3 := goresult.NewResult("ok3")
 
-checker := []Result[string]{*c, *c2, *c3}
+ch := []Result[string]{*c, *c2, *c3}
 
 fmt.Println(goresult.CheckAll(ch)) // [ok ok3]
 ```

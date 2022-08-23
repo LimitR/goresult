@@ -27,7 +27,7 @@ func CheckAll[T any](arrayResults []Result[T]) []T {
 	result := []T{}
 	for i := 0; i < len(arrayResults); i++ {
 		if arrayResults[i].IsOk() {
-			result = append(result, arrayResults[i].Unwrap())
+			result = append(result, arrayResults[i].value)
 		}
 	}
 	return result
@@ -76,11 +76,11 @@ func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
 	return s.value
 }
 
-func (s *Result[T]) AddError(value string) *Result[T] {
+func (s *Result[T]) AddError(value error) *Result[T] {
 	if s.err != nil {
 		panic(s.err)
 	}
-	s.err = errors.New(value)
+	s.err = value
 	return s
 }
 
