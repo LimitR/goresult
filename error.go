@@ -1,6 +1,7 @@
 package goresult
 
 import (
+	"fmt"
 	"regexp"
 	"runtime"
 )
@@ -23,7 +24,7 @@ func (e *err) AddTrace() {
 }
 
 func (e *err) print() string {
-	res := "Trace: " + e.printTrace() + "\n"
+	res := "\nTrace: " + e.printTrace() + "\n"
 	res += "Message: " + e.printMessage()
 	return res
 }
@@ -33,9 +34,9 @@ func (e *err) printTrace() string {
 	for i, v := range reverseInts(e.trace) {
 		if v.fnName != "" {
 			if i == len(e.trace)-1 {
-				str += v.fnName
+				str += v.fnName + ":" + fmt.Sprint(v.line)
 			} else {
-				str += v.fnName + " -> "
+				str += v.fnName + ":" + fmt.Sprint(v.line) + " -> "
 			}
 		}
 	}
@@ -44,9 +45,13 @@ func (e *err) printTrace() string {
 
 func (e *err) printMessage() string {
 	str := ""
-	for _, v := range reverseInts(e.trace) {
+	for i, v := range reverseInts(e.trace) {
 		if v.message != "" {
-			str += v.fnName + " '" + v.message + "', "
+			if i == len(e.trace)-1 {
+				str += v.fnName + " '" + v.message + "'"
+			} else {
+				str += v.fnName + " '" + v.message + "', "
+			}
 		}
 	}
 	return str
