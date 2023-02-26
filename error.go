@@ -7,10 +7,10 @@ import (
 )
 
 type trace struct {
-	message  string
-	fnName   string
-	fileName string
-	line     int
+	Message  string
+	FnName   string
+	FileName string
+	Line     int
 }
 
 type err struct {
@@ -32,11 +32,11 @@ func (e *err) print() string {
 func (e *err) printTrace() string {
 	str := ""
 	for i, v := range reverseInts(e.trace) {
-		if v.fnName != "" {
+		if v.FnName != "" {
 			if i == len(e.trace)-1 {
-				str += v.fnName + ":" + fmt.Sprint(v.line)
+				str += v.FnName + ":" + fmt.Sprint(v.Line)
 			} else {
-				str += v.fnName + ":" + fmt.Sprint(v.line) + " -> "
+				str += v.FnName + ":" + fmt.Sprint(v.Line) + " -> "
 			}
 		}
 	}
@@ -46,11 +46,11 @@ func (e *err) printTrace() string {
 func (e *err) printMessage() string {
 	str := ""
 	for i, v := range reverseInts(e.trace) {
-		if v.message != "" {
+		if v.Message != "" {
 			if i == len(e.trace)-1 {
-				str += v.fnName + " '" + v.message + "'"
+				str += v.FnName + " '" + v.Message + "'"
 			} else {
-				str += v.fnName + " '" + v.message + "', "
+				str += v.FnName + " '" + v.Message + "', "
 			}
 		}
 	}
@@ -65,14 +65,14 @@ func reverseInts(input []trace) []trace {
 }
 
 func getTrace(lvl int) trace {
-	pc, file, line, _ := runtime.Caller(lvl)
+	pc, file, Line, _ := runtime.Caller(lvl)
 	functionObject := runtime.FuncForPC(pc)
 	extractFnName := regexp.MustCompile(`^.*\.(.*)$`)
-	fnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
+	FnName := extractFnName.ReplaceAllString(functionObject.Name(), "$1")
 	return trace{
-		fnName:   fnName,
-		fileName: file,
-		line:     line,
-		message:  "",
+		FnName:   FnName,
+		FileName: file,
+		Line:     Line,
+		Message:  "",
 	}
 }

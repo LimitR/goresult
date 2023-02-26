@@ -30,7 +30,7 @@ func NewResult[T any](value T, args ...bool) *Result[T] {
 func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
 	if len(args) > 0 && !args[0] {
 		t := trace{}
-		t.message = errs.Error()
+		t.Message = errs.Error()
 		return &Result[T]{
 			value: value,
 			err: err{
@@ -43,7 +43,7 @@ func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
 		}
 	} else {
 		t := getTrace(2)
-		t.message = errs.Error()
+		t.Message = errs.Error()
 		return &Result[T]{
 			value: value,
 			err: err{
@@ -84,7 +84,7 @@ func (s *Result[T]) Unwrap() T {
 		return s.value
 	} else {
 		if s.err.Err != nil {
-			panic(s.err)
+			panic(s.err.Err.Error())
 		}
 		return s.value
 	}
@@ -96,7 +96,8 @@ func (s *Result[T]) UnwrapDelay(callback func(res T)) T {
 		defer func() {
 			s.err.Err = nil
 		}()
-		panic(s.err)
+		errStr := s.err.print()
+		panic(errStr)
 	}
 	return s.value
 }
@@ -129,7 +130,7 @@ func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
 func (s *Result[T]) AddError(errs error) *Result[T] {
 	if s.mode {
 		t := getTrace(2)
-		t.message = errs.Error()
+		t.Message = errs.Error()
 		s.err = err{
 			trace: append(s.err.trace, t),
 			Err:   errs,
@@ -137,7 +138,7 @@ func (s *Result[T]) AddError(errs error) *Result[T] {
 		return s
 	} else {
 		t := trace{}
-		t.message = errs.Error()
+		t.Message = errs.Error()
 		s.err = err{
 			trace: append(s.err.trace, t),
 			Err:   errs,
