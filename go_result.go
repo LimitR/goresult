@@ -2,24 +2,59 @@ package goresult
 
 import (
 	"errors"
+	"time"
 )
 
 type Result[T any] struct {
 	value T
-	err   error
+	err   err
+	mode  bool
 }
 
-func NewResult[T any](value T) *Result[T] {
-	return &Result[T]{
-		value: value,
-		err:   nil,
+func NewResult[T any](value T, args ...bool) *Result[T] {
+	if len(args) > 0 || !args[0] {
+		return &Result[T]{
+			value: value,
+			err:   err{},
+			mode:  false,
+		}
+	} else {
+		return &Result[T]{
+			value: value,
+			err:   err{},
+			mode:  true,
+		}
 	}
 }
 
-func CreateResultFrom[T any](value T, err error) *Result[T] {
-	return &Result[T]{
-		value: value,
-		err:   err,
+func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
+	if len(args) > 0 && !args[0] {
+		t := trace{}
+		t.Message = errs.Error()
+		return &Result[T]{
+			value: value,
+			err: err{
+				trace: []trace{
+					t,
+				},
+				TimeStamp: time.Now().Unix(),
+				Err:       errs,
+			},
+		}
+	} else {
+		t := getTrace(2)
+		t.Message = errs.Error()
+		return &Result[T]{
+			value: value,
+			err: err{
+				trace: []trace{
+					t,
+				},
+				TimeStamp: time.Now().Unix(),
+				Err:       errs,
+			},
+			mode: true,
+		}
 	}
 }
 
@@ -33,65 +68,97 @@ func CheckAll[T any](arrayResults []Result[T]) []T {
 	return result
 }
 
-func (s *Result[T]) Unwrap() T {
-	if s.err != nil {
-		panic(s.err)
+func (s *Result[T]) AddTrace() {
+	if s.mode {
+		s.err.AddTrace()
 	}
-	return s.value
+}
+
+func (s *Result[T]) Unwrap() T {
+	if s.mode {
+		s.err.trace = append(s.err.trace, getTrace(2))
+		if s.err.Err != nil {
+			errStr := s.err.print()
+			panic(errStr)
+		}
+		return s.value
+	} else {
+		if s.err.Err != nil {
+			panic(s.err.Err.Error())
+		}
+		return s.value
+	}
 }
 
 func (s *Result[T]) UnwrapDelay(callback func(res T)) T {
-	if s.err != nil {
+	if s.err.Err != nil {
 		defer callback(s.value)
 		defer func() {
-			s.err = nil
+			s.err.Err = nil
 		}()
-		panic(s.err)
+		errStr := s.err.print()
+		panic(errStr)
 	}
 	return s.value
 }
 
 func (s *Result[T]) Expect(messageError string) T {
-	if s.err != nil {
+	if s.err.Err != nil {
 		panic(messageError)
 	}
 	return s.value
 }
 
 func (s *Result[T]) UnwrapOrElse(value T) T {
-	if s.err != nil {
-		s.err = nil
+	if s.err.Err != nil {
+		s.err.Err = nil
 		s.value = value
 	}
 	return s.value
 }
 
 func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
-	if s.err != nil {
-		s.err = nil
-		res := callback(s.err)
+	if s.err.Err != nil {
+		s.err.Err = nil
+		res := callback(s.err.Err)
 		s.value = res
 		return res
 	}
 	return s.value
 }
 
-func (s *Result[T]) AddError(value error) *Result[T] {
-	if s.err != nil {
-		panic(s.err)
+func (s *Result[T]) AddError(errs error) *Result[T] {
+	if s.mode {
+		t := getTrace(2)
+		t.Message = errs.Error()
+		s.err = err{
+			trace: append(s.err.trace, t),
+			Err:   errs,
+		}
+		return s
+	} else {
+		t := trace{}
+		t.Message = errs.Error()
+		s.err = err{
+			trace: append(s.err.trace, t),
+			Err:   errs,
+		}
+		return s
 	}
-	s.err = value
-	return s
 }
 
-func (s *Result[T]) Match(err error) error {
-	if errors.Is(s.err, err) {
-		return s.err
+func (s *Result[T]) GetErrorTrace() []trace {
+	return s.err.trace
+}
+
+func (s *Result[T]) Match(errs error) error {
+	if errors.Is(s.err.Err, errs) {
+		return s.err.Err
 	} else {
 		return nil
 	}
 }
 
 func (s *Result[T]) IsOk() bool {
-	return s.err == nil
+	return s.err.Err == nil
 }

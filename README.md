@@ -92,3 +92,76 @@ ch := []Result[string]{*c, *c2, *c3}
 
 fmt.Println(goresult.CheckAll(ch)) // [ok ok3]
 ```
+## Trace error
+
+```go
+func main() {
+	result := a()
+	value := result.Unwrap()
+	fmt.Println(value)
+}
+
+func a() *goresult.Result[string] {
+	result := b()
+	// Some code...
+	result.AddTrace()
+	return result
+}
+
+func b() *goresult.Result[string] {
+	result := c()
+	// Some code...
+	if !result.IsOk() {
+		result.AddError(errors.New("Error in 'b'"))
+	}
+	return result
+}
+
+func c() *goresult.Result[string] {
+	result := goresult.CreateResultFrom(d())
+	// Some code...
+	return result
+}
+
+func d() (string, error) {
+	return "", errors.New("Error in 'd'")
+}
+```
+Out:
+```bash
+panic:
+Trace: main:12 -> a:19 -> b:27 -> c:33
+Message: b 'Error in "b"', c 'Error in "d"'
+```
+## Disable trace
+```go
+// Some function
+// ...
+func c() *goresult.Result[string] {
+	v, e := d()
+	result := goresult.CreateResultFrom(v, e, false)
+	// Some code...
+	return result
+}
+
+func d() (string, error) {
+	return "", errors.New("Error in 'd'")
+}
+```
+Out:
+```bash
+panic: Error in 'b'
+```
+Output last error
+
+# Get trace
+```go
+func main() {
+	result := a()
+	value := result.GetErrorTrace() // []trace
+	fmt.Println(value[0].Message)  // Error in 'd'
+	fmt.Println(value[0].FileName) // /home/.../main.go
+	fmt.Println(value[0].FnName)   // c
+	fmt.Println(value[0].Line)     // 37
+}
+```
