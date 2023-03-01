@@ -1,6 +1,7 @@
 package goresult
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -9,6 +10,7 @@ type Result[T any] struct {
 	value T
 	err   err
 	mode  bool
+	ctx   context.Context
 }
 
 func NewResult[T any](value T, args ...bool) *Result[T] {
@@ -58,6 +60,23 @@ func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
 	}
 }
 
+func CreateResultCallback[T any](ctx context.Context, callback func() (T, error), channel chan *Result[T]) {
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				channel <- &Result[T]{}
+			default:
+				go func() {
+					result := CreateResultFrom(callback())
+					result.addContext(ctx)
+					channel <- result
+				}()
+			}
+		}
+	}()
+}
+
 func CheckAll[T any](arrayResults []Result[T]) []T {
 	result := []T{}
 	for i := 0; i < len(arrayResults); i++ {
@@ -66,6 +85,10 @@ func CheckAll[T any](arrayResults []Result[T]) []T {
 		}
 	}
 	return result
+}
+
+func (s *Result[T]) addContext(ctx context.Context) {
+	s.ctx = ctx
 }
 
 func (s *Result[T]) AddTrace() {

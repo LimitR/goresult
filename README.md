@@ -165,3 +165,37 @@ func main() {
 	fmt.Println(value[0].Line)     // 37
 }
 ```
+# Context
+```go
+func main() {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Millisecond)
+	defer cancel()
+	// Create channel for struct
+	ch := make(chan *goresult.Result[string])
+	// Started function in gorutine
+	goresult.CreateResultCallback(ctx, d, ch)
+	go func() {
+		// Wait result or context cancellation
+		fmt.Println(<-ch) // &Result{} - blank struct result
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func d() (string, error) {
+	time.Sleep(5 * time.Second)
+	return "", errors.New("Error in 'd'")
+}
+
+// But
+func d() (string, error) {
+	// time.Sleep(5 * time.Second)
+	return "", errors.New("Error in 'd'")
+}
+//...
+	fmt.Println(<-ch) // &Result{} - correct struct result
+//...
+```

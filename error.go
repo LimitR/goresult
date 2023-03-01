@@ -31,12 +31,13 @@ func (e *err) print() string {
 
 func (e *err) printTrace() string {
 	str := ""
-	for i, v := range reverseInts(e.trace) {
-		if v.FnName != "" {
-			if i == len(e.trace)-1 {
-				str += v.FnName + ":" + fmt.Sprint(v.Line)
+	l := len(e.trace)
+	for i, _ := range e.trace {
+		if e.trace[l-i-1].FnName != "" {
+			if i == l-1 {
+				str += e.trace[l-i-1].FnName + ":" + fmt.Sprint(e.trace[l-i-1].Line)
 			} else {
-				str += v.FnName + ":" + fmt.Sprint(v.Line) + " -> "
+				str += e.trace[l-i-1].FnName + ":" + fmt.Sprint(e.trace[l-i-1].Line) + " -> "
 			}
 		}
 	}
@@ -45,23 +46,17 @@ func (e *err) printTrace() string {
 
 func (e *err) printMessage() string {
 	str := ""
-	for i, v := range reverseInts(e.trace) {
-		if v.Message != "" {
-			if i == len(e.trace)-1 {
-				str += v.FnName + " '" + v.Message + "'"
+	l := len(e.trace)
+	for i, _ := range e.trace {
+		if e.trace[l-i-1].Message != "" {
+			if i == l-1 {
+				str += e.trace[l-i-1].FnName + " '" + e.trace[l-i-1].Message + "'"
 			} else {
-				str += v.FnName + " '" + v.Message + "', "
+				str += e.trace[l-i-1].FnName + " '" + e.trace[l-i-1].Message + "', "
 			}
 		}
 	}
 	return str
-}
-
-func reverseInts(input []trace) []trace {
-	if len(input) == 0 {
-		return input
-	}
-	return append(reverseInts(input[1:]), input[0])
 }
 
 func getTrace(lvl int) trace {
