@@ -165,3 +165,48 @@ func main() {
 	fmt.Println(value[0].Line)     // 37
 }
 ```
+# Context
+```go
+func main() {
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	res := a(ctx)
+	r := <-res
+	result := r.Unwrap()
+	fmt.Println(result) // Data
+}
+
+func a(ctx context.Context) chan *goresult.Result[string] {
+	res := goresult.CreateResultChannel(ctx, d)
+	return res
+}
+
+func d() (string, error) {
+	time.Sleep(1 * time.Second)
+	return "Data", nil
+}
+
+// Or
+func main() {
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 0)
+	defer cancel()
+	res := a(ctx)
+	r := <-res
+	result := r.Unwrap() // Panic
+	// Trace: main:16 -> a:21
+	// Message: a 'context deadline exceeded'
+	fmt.Println(result)
+}
+
+func a(ctx context.Context) chan *goresult.Result[string] {
+	res := goresult.CreateResultChannel(ctx, d)
+	return res
+}
+
+func d() (string, error) {
+	time.Sleep(1 * time.Second)
+	return "Data", nil
+}
+```
