@@ -60,21 +60,67 @@ func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
 	}
 }
 
-func CreateResultCallback[T any](ctx context.Context, callback func() (T, error), channel chan *Result[T]) {
+func CreateResultChannel[T any](ctx context.Context, callback func() (T, error), args ...bool) chan *Result[T] {
+	res := make(chan *Result[T])
+	t := trace{}
+	mode := false
+	if len(args) <= 0 {
+		t = getTrace(2)
+		mode = true
+	} else {
+		mode = args[0]
+	}
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
-				channel <- &Result[T]{}
+				if len(args) > 0 && !args[0] {
+					res <- &Result[T]{
+						err: err{
+							trace: []trace{
+								t,
+							},
+							Err:       ctx.Err(),
+							TimeStamp: time.Now().Unix(),
+						},
+					}
+				} else {
+					t.Message = ctx.Err().Error()
+					res <- &Result[T]{
+						err: err{
+							trace: []trace{
+								t,
+							},
+							Err:       ctx.Err(),
+							TimeStamp: time.Now().Unix(),
+						},
+						mode: true,
+					}
+				}
 			default:
 				go func() {
-					result := CreateResultFrom(callback())
+					callbackResult, errs := callback()
+					if errs != nil {
+						t.Message = errs.Error()
+					}
+					result := &Result[T]{
+						value: callbackResult,
+						err: err{
+							trace: []trace{
+								t,
+							},
+							TimeStamp: time.Now().Unix(),
+							Err:       errs,
+						},
+						mode: mode,
+					}
 					result.addContext(ctx)
-					channel <- result
+					res <- result
 				}()
 			}
 		}
 	}()
+	return res
 }
 
 func CheckAll[T any](arrayResults []Result[T]) []T {
@@ -88,7 +134,9 @@ func CheckAll[T any](arrayResults []Result[T]) []T {
 }
 
 func (s *Result[T]) addContext(ctx context.Context) {
-	s.ctx = ctx
+	if s.ctx == nil {
+		s.ctx = ctx
+	}
 }
 
 func (s *Result[T]) AddTrace() {

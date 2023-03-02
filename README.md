@@ -168,34 +168,45 @@ func main() {
 # Context
 ```go
 func main() {
-	wg := sync.WaitGroup{}
-	wg.Add(1)
 	// Create context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	// Create channel for struct
-	ch := make(chan *goresult.Result[string])
-	// Started function in gorutine
-	goresult.CreateResultCallback(ctx, d, ch)
-	go func() {
-		// Wait result or context cancellation
-		fmt.Println(<-ch) // &Result{} - blank struct result
-		wg.Done()
-	}()
-	wg.Wait()
+	res := a(ctx)
+	r := <-res
+	result := r.Unwrap()
+	fmt.Println(result) // Data
+}
+
+func a(ctx context.Context) chan *goresult.Result[string] {
+	res := goresult.CreateResultChannel(ctx, d)
+	return res
 }
 
 func d() (string, error) {
-	time.Sleep(5 * time.Second)
-	return "", errors.New("Error in 'd'")
+	time.Sleep(1 * time.Second)
+	return "Data", nil
 }
 
-// But
-func d() (string, error) {
-	// time.Sleep(5 * time.Second)
-	return "", errors.New("Error in 'd'")
+// Or
+func main() {
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 0)
+	defer cancel()
+	res := a(ctx)
+	r := <-res
+	result := r.Unwrap() // Panic
+	// Trace: main:16 -> a:21
+	// Message: a 'context deadline exceeded'
+	fmt.Println(result)
 }
-//...
-	fmt.Println(<-ch) // &Result{} - correct struct result
-//...
+
+func a(ctx context.Context) chan *goresult.Result[string] {
+	res := goresult.CreateResultChannel(ctx, d)
+	return res
+}
+
+func d() (string, error) {
+	time.Sleep(1 * time.Second)
+	return "Data", nil
+}
 ```
