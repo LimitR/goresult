@@ -45,7 +45,9 @@ func CreateResultFrom[T any](value T, errs error, args ...bool) *Result[T] {
 		}
 	} else {
 		t := getTrace(2)
-		t.Message = errs.Error()
+		if errs != nil {
+			t.Message = errs.Error()
+		}
 		return &Result[T]{
 			value: value,
 			err: err{
@@ -190,8 +192,8 @@ func (s *Result[T]) UnwrapOrElse(value T) T {
 
 func (s *Result[T]) UnwrapOrOn(callback func(error) T) T {
 	if s.err.Err != nil {
-		s.err.Err = nil
 		res := callback(s.err.Err)
+		s.err.Err = nil
 		s.value = res
 		return res
 	}
@@ -222,11 +224,11 @@ func (s *Result[T]) GetErrorTrace() []trace {
 	return s.err.trace
 }
 
-func (s *Result[T]) Match(errs error) error {
+func (s *Result[T]) Match(errs error) bool {
 	if errors.Is(s.err.Err, errs) {
-		return s.err.Err
+		return true
 	} else {
-		return nil
+		return false
 	}
 }
 

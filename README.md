@@ -187,7 +187,7 @@ func d() (string, error) {
 	return "Data", nil
 }
 ```
-## Or
+### Or
 ```go
 func main() {
 	// Create context with timeout
