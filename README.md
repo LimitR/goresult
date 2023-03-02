@@ -186,8 +186,9 @@ func d() (string, error) {
 	time.Sleep(1 * time.Second)
 	return "Data", nil
 }
-
-// Or
+```
+## Or
+```go
 func main() {
 	// Create context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 0)
